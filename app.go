@@ -12,6 +12,7 @@ type App struct {
 	client *redis.Client
 }
 
+
 func launchApp() *App {
 	app := new(App)
 	app.id = RandStringBytesMask(8)
@@ -53,6 +54,7 @@ func RandStringBytesMask(n int) string {
 }
 
 
+//Controller
 func (app *App) Controller () {
 	if app.isGenerator {
 		app.sendMessage()

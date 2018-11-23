@@ -24,12 +24,14 @@ func (app *App) newMessage() *Message {
 	return m
 }
 
+//Just generate random pseudo text
 func loremIpsum() string {
 	lorem := new (faker.Lorem)
 	s := lorem.Sentence()
 	return s
 }
 
+//Send the new message to queue in redis
 func (app *App) sendMessage() {
 	m := app.newMessage()
 	JSON, _ := json.Marshal(m)
@@ -43,6 +45,7 @@ func (app *App) sendMessage() {
 	}
 }
 
+//Get a message from the queue and verifies it
 func (app *App) verifyMessage() {
 	reply := app.client.RPop("Messages")
 	err := reply.Err();
@@ -55,6 +58,7 @@ func (app *App) verifyMessage() {
 	}
 }
 
+//Simulates message verification: identidies the message as incorrect with a 5% probability
 func (app *App) verify(message string) {
 	rand.Seed(int64(time.Now().Second()))
 	if rand.Intn(20) == 1 {
@@ -67,6 +71,4 @@ func (app *App) verify(message string) {
 	} else {
 		fmt.Println("The following message has been SUCCESSFULLY verified:", message)
 	}
-
-
 }

@@ -6,6 +6,10 @@ import (
 	"github.com/go-redis/redis"
 )
 
+//Check app status at Redis database:
+//If there is no "generatorID" key the app will try to become generator;
+//If the value on "generatorID" key is equal to app.id then the app is generator already and status wil be updated;
+//In any other case the app is not a generator.
 func (app *App) checkStatus () {
 	generatorID, err := app.client.Get("generatorID").Result()
 	if err == redis.Nil {
@@ -19,6 +23,9 @@ func (app *App) checkStatus () {
 	}
 }
 
+//Try to set app.id as generatorID to Redis database only if the "generatorID" key does not exist.
+//If redis cmd is successful then the app has become a generator;
+//If "generatorID" key exists already then the app is not a generator.
 func (app *App) setStatus() {
 	reply := app.client.SetNX("generatorID", app.id, time.Millisecond * 1000)
 	if err := reply.Err(); err != nil {
@@ -33,6 +40,7 @@ func (app *App) setStatus() {
 	}
 }
 
+//Update the app status by extending the existence of the "generatorID" key
 func (app *App) updateStatus() {
 	reply := app.client.Expire("generatorID", time.Millisecond * 1000)
 	if err := reply.Err(); err != nil {
