@@ -26,7 +26,7 @@ func (app *App) checkStatus () (bool, error) {
 
 	default :
 		app.isGenerator = false
-		return false, err
+		return true, err
 	}
 }
 
@@ -44,17 +44,17 @@ func statusFunc(f func() (bool, error)) (bool, error) {
 func (app *App) setStatus() (bool, error) {
 	reply := app.client.SetNX("generatorID", app.id, time.Millisecond * 1000)
 	if err := reply.Err(); err != nil {
-		fmt.Println("ERROR occurred while STARTING the generator!", err)
 		app.isGenerator = false
-		return false, err
+		return false, newError("/n ERROR occurred while STARTING THE GENERATOR! /n"/*, err*/)
+
 	} else if reply.Val() == false {
-		fmt.Println("Attempt to start generator FAILED! Generator has been started already")
 		app.isGenerator = false
-		return false, err
+		return true, newError("/n Attempt to start generator FAILED! Generator has been started already /n")
+
 	} else {
-		fmt.Println("Generator was started successfully!")
+		fmt.Println("/n Generator has been started successfully! /n")
 		app.isGenerator = true
-		return true, err
+		return true, nil
 	}
 }
 
@@ -62,11 +62,10 @@ func (app *App) setStatus() (bool, error) {
 func (app *App) updateStatus() (bool, error) {
 	reply := app.client.Expire("generatorID", time.Millisecond * 1000)
 	if err := reply.Err(); err != nil {
-		fmt.Println("ERROR occurred while UPDATING the generator status!")
-		fmt.Println("The generator operation is terminated.")
+		//fmt.Println("/n The generator operation is terminated. /n")
 		app.isGenerator = false
-		return true, err
+		return false, newError("ERROR occurred while UPDATING THE GENERATOR STATUS! /n" /*+ err*/)
 	} else {
-		return true, err
+		return true, nil
 	}
 }
